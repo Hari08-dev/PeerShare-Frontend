@@ -16,7 +16,11 @@ function App() {
 
     const [isHost, setIsHost] = useState(false);
 
-    const [peers, setPeers] = useState([]);
+    const [peers, setPeers] = useState({});
+
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const [connecting, setConnecting] = useState(false);
 
     useEffect(() => {
 
@@ -38,7 +42,19 @@ function App() {
 
         socket.on("room-users", (users) => {
 
-            setPeers(users);
+            const peerMap = {};
+
+            users.forEach((id) => {
+
+                if (id !== socket.id) {
+
+                    peerMap[id] = null;
+
+                }
+
+            });
+
+            setPeers(peerMap);
 
         });
 

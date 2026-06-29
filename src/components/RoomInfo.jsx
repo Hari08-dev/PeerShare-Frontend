@@ -4,7 +4,7 @@ export default function RoomInfo({ roomId, isHost }) {
 
         await navigator.clipboard.writeText(roomId);
 
-        alert("Copied!");
+        setMessage("Code copied to clipboard!");
     };
 
     return (

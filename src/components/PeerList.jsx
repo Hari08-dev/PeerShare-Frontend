@@ -6,11 +6,11 @@ export default function PeerList({ peers }) {
 
             <h2>Connected Peers</h2>
 
-            {peers.length === 0 && (
+            {Object.keys(peers).length === 0 && (
                 <p>No peers connected.</p>
             )}
 
-            {peers.map((peer, index) => (
+            {Object.keys(peers).map((peer, index) => (
 
                 <div
                     key={peer}
