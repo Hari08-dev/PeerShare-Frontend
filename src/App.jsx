@@ -1,30 +1,104 @@
-import { useEffect } from "react";
-import RoomControls from "./components/RoomControls";
+import { useEffect, useState } from "react";
+
 import socket from "./services/socket";
 
+import RoomControls from "./components/RoomControls";
+import RoomInfo from "./components/RoomInfo";
+import PeerList from "./components/PeerList";
+
+import "./App.css";
+
 function App() {
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected:", socket.id);
-    });
 
-    socket.on("user-joined", (data) => {
-      console.log("User joined:", data.socketId);
-      alert(`User joined: ${data.socketId}`);
-    });
+    const [roomId, setRoomId] = useState("");
 
-    return () => {
-      socket.off("connect");
-      socket.off("user-joined");
-    };
-  }, []);
+    const [joined, setJoined] = useState(false);
 
-  return (
-    <div>
-      <h1>P2P Share</h1>
-      <RoomControls />
-    </div>
-  );
+    const [isHost, setIsHost] = useState(false);
+
+    const [peers, setPeers] = useState([]);
+
+    useEffect(() => {
+
+        socket.on("room-created", (data) => {
+
+            setRoomId(data.roomId);
+            setJoined(true);
+            setIsHost(true);
+
+        });
+
+        socket.on("room-joined", (data) => {
+
+            setRoomId(data.roomId);
+            setJoined(true);
+            setIsHost(false);
+
+        });
+
+        socket.on("room-users", (users) => {
+
+            setPeers(users);
+
+        });
+
+        socket.on("room-error", (msg) => {
+
+            alert(msg);
+
+        });
+
+        socket.on("peer-joined", (id) => {
+
+            console.log(id + " joined");
+
+        });
+
+        socket.on("peer-left", (id) => {
+
+            console.log(id + " left");
+
+        });
+
+        return () => {
+
+            socket.off();
+
+        };
+
+    }, []);
+
+    return (
+
+        <div className="container">
+
+            <h1>Peer Share</h1>
+
+            <RoomControls
+                roomId={roomId}
+                setRoomId={setRoomId}
+                joined={joined}
+                setJoined={setJoined}
+                isHost={isHost}
+                setIsHost={setIsHost}
+            />
+
+            {joined && (
+                <>
+                    <RoomInfo
+                        roomId={roomId}
+                        isHost={isHost}
+                    />
+
+                    <PeerList
+                        peers={peers}
+                    />
+                </>
+            )}
+
+        </div>
+
+    );
 }
 
 export default App;

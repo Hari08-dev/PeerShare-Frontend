@@ -1,37 +1,68 @@
 import { useState } from "react";
 import socket from "../services/socket";
 
-function RoomControls() {
-  const [roomId, setRoomId] = useState("");
+export default function RoomControls({
+    roomId,
+    setRoomId,
+    joined,
+    setJoined,
+    isHost,
+    setIsHost,
+}) {
 
-  const createRoom = () => {
-    socket.emit("create-room", roomId);
-    alert(`Created room ${roomId}`);
-  };
+    const [joinCode, setJoinCode] = useState("");
 
-  const joinRoom = () => {
-    socket.emit("join-room", roomId);
-    alert(`Joined room ${roomId}`);
-  };
+    const createRoom = () => {
+        socket.emit("create-room");
+    };
 
-  return (
-    <div>
-      <input
-        type="text"
-        placeholder="Room ID"
-        value={roomId}
-        onChange={(e) => setRoomId(e.target.value)}
-      />
+    const joinRoom = () => {
 
-      <button onClick={createRoom}>
-        Create Room
-      </button>
+        if (!joinCode.trim()) return;
 
-      <button onClick={joinRoom}>
-        Join Room
-      </button>
-    </div>
-  );
+        socket.emit("join-room", joinCode);
+    };
+
+    const leaveRoom = () => {
+
+        socket.emit("leave-room");
+
+        setJoined(false);
+        setRoomId("");
+        setIsHost(false);
+    };
+
+    return (
+        <div className="controls">
+
+            {!joined && (
+                <>
+                    <button onClick={createRoom}>
+                        Create Room
+                    </button>
+
+                    <input
+                        placeholder="Room Code"
+                        value={joinCode}
+                        onChange={(e) =>
+                            setJoinCode(e.target.value.toUpperCase())
+                        }
+                    />
+
+                    <button onClick={joinRoom}>
+                        Join Room
+                    </button>
+                </>
+            )}
+
+            {joined && (
+                <button
+                    className="leave"
+                    onClick={leaveRoom}
+                >
+                    Leave Room
+                </button>
+            )}
+        </div>
+    );
 }
-
-export default RoomControls;
