@@ -3,10 +3,8 @@ import { useEffect, useState } from "react";
 import socket from "./services/socket";
 
 import {
-    createOffer,
-    handleOffer,
-    handleAnswer,
-    handleIce,
+    createPeerConnection,
+    getPeerConnection,
     removePeerConnection,
 } from "./services/webrtc";
 
@@ -24,7 +22,7 @@ function App() {
 
     const [isHost, setIsHost] = useState(false);
 
-    const [peers, setPeers] = useState([]);
+    const [peers, setPeers] = useState({});
 
     const [selectedFile, setSelectedFile] = useState(null);
 
@@ -50,11 +48,19 @@ function App() {
 
         socket.on("room-users", (users) => {
 
-            const otherPeers = users.filter(
-                (id) => id !== socket.id
-            );
+            const peerMap = {};
 
-            setPeers(otherPeers);
+            users.forEach((id) => {
+
+                if (id !== socket.id) {
+
+                    peerMap[id] = createPeerConnection(id);
+
+                }
+
+            });
+
+            setPeers(peerMap);
 
         });
 
@@ -64,11 +70,11 @@ function App() {
 
         });
 
-        socket.on("peer-joined", async (id) => {
+        socket.on("peer-joined", (id) => {
 
             console.log(id + " joined");
 
-            await createOffer(id, socket);
+            createPeerConnection(id);
 
         });
 
@@ -85,24 +91,6 @@ function App() {
             socket.off();
 
         };
-
-        socket.on("offer", async ({ sender, offer }) => {
-
-            await handleOffer(sender, offer, socket);
-
-        });
-
-        socket.on("answer", async ({ sender, answer }) => {
-
-            await handleAnswer(sender, answer);
-
-        });
-
-        socket.on("ice-candidate", async ({ sender, candidate }) => {
-
-            await handleIce(sender, candidate);
-
-        });
 
     }, []);
 
