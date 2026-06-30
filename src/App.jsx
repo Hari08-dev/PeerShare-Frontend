@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 
 import socket from "./services/socket";
 
+import {
+    createPeerConnection,
+    getPeerConnection,
+    removePeerConnection,
+} from "./services/webrtc";
+
 import RoomControls from "./components/RoomControls";
 import RoomInfo from "./components/RoomInfo";
 import PeerList from "./components/PeerList";
@@ -48,7 +54,7 @@ function App() {
 
                 if (id !== socket.id) {
 
-                    peerMap[id] = null;
+                    peerMap[id] = createPeerConnection(id);
 
                 }
 
@@ -68,11 +74,15 @@ function App() {
 
             console.log(id + " joined");
 
+            createPeerConnection(id);
+
         });
 
         socket.on("peer-left", (id) => {
 
             console.log(id + " left");
+
+            removePeerConnection(id);
 
         });
 
